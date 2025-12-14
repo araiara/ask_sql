@@ -1,0 +1,6 @@
+psycopg2-binary
+langchain
+langchain-aws
+python-dotenv
+langchain-chroma
+langchain-community
