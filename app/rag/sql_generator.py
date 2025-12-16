@@ -5,7 +5,7 @@ from app.config import get_bedrock_client
 
 def generate_sql(question: str, retrieved_docs: str) -> str:
     llm = ChatBedrock(
-        client=get_bedrock_client(), model_id="amazon.nova-lite-v1:0", temperature=0
+        client=get_bedrock_client(), model_id="amazon.nova-pro-v1:0", temperature=0
     )
 
     prompt_template: str = """
@@ -25,6 +25,7 @@ User question:
 {question}
 
 Write a correct Postgres SQL query. Only return SQL, no explanations.
+Make sure the generated query is syntactically correct.
 
 SQL Query:
 """
