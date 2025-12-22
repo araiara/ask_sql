@@ -22,7 +22,6 @@ This system extracts database schema metadata, embeds it into a vector database,
                                 ▼
                          ┌──────────────┐
                          │  AWS Bedrock │
-                         │  (Nova Lite) │
                          └──────┬───────┘
                                 │
                                 ▼
@@ -164,35 +163,35 @@ make clean
 - Creates sample e-commerce database schema
 - Inserts test data for products, customers, orders
 
-### 2. **Schema Extraction** (`app/embedding/schema_extractor.py`)
-- Queries PostgreSQL `information_schema`
-- Extracts tables, columns, data types, constraints
-- Identifies primary keys and foreign key relationships
+### 2. **Semantic Docs** (`app/embedding/semantic_docs.py`)
+- Semantic docs for database schema
 
-### 3. **Document Generation** (`app/embedding/doc_generator.py`)
-- Converts schema metadata into semantic text documents
-- Formats information for embedding
-
-### 4. **Embedding** (`app/embedding/embed.py`)
+### 3. **Embedding** (`app/embedding/embed.py`)
+- Takes semantic documents from in step 2
 - Uses AWS Bedrock Titan embeddings (1024 dimensions)
-- Stores vectors in ChromaDB for semantic retrieval
+- Stores document vectors in ChromaDB for semantic retrieval
 - Creates persistent collection: `schema_metadata`
 
-### 5. **RAG Pipeline** (`app/run.py`)
+### 4. **RAG Pipeline** (`app/run.py`)
+   **a. Generate Authorative Schema** (`app/rag/schema_extractor.py`)
+    - Queries PostgreSQL `information_schema`
+    - Extracts tables, columns, data types, constraints
+    - Identifies primary keys and foreign key relationships
 
-   **a. Retrieval** (`app/rag/retriever.py`)
+   **b. Retrieval** (`app/rag/retriever.py`)
    - Takes user's natural language question
-   - Performs semantic similarity search in ChromaDB
-   - Retrieves top-k relevant schema documents
+   - Performs semantic similarity search against embedded schema documents in ChromaDB
+   - Retrieves top-k most relevant schema documents
 
-   **b. SQL Generation** (`app/rag/sql_generator.py`)
-   - Sends question + retrieved schema to AWS Bedrock Nova Lite
-   - LLM generates PostgreSQL query
+   **c. SQL Generation** (`app/rag/sql_generator.py`)
+   - Sends question + retrieved schema documents to AWS Bedrock Nova Lite
+   - LLM generates PostgreSQL query based on context
    - Cleans markdown formatting from response
 
-   **c. Execution** (`app/rag/executor.py`)
+   **d. Execution** (`app/rag/executor.py`)
    - Executes generated SQL against PostgreSQL
    - Returns query results or error messages
+   - Gracefully handles execution failures
 
 ## Project Structure
 
@@ -204,12 +203,12 @@ sql-genai/
 │   ├── run.py                 # RAG pipeline entry point
 │   ├── seed_db.py             # Database seeding script
 │   ├── embedding/
-│   │   ├── schema_extractor.py   # Extract DB schema
-│   │   ├── doc_generator.py      # Generate semantic docs
-│   │   └── embed.py               # Embed to ChromaDB
+│   │   ├── semantic_docs.py   # Generate semantic docs
+│   │   └── embed.py           # Embed to ChromaDB
 │   └── rag/
 │       ├── retriever.py           # Semantic search
 │       ├── sql_generator.py       # LLM SQL generation
+│       ├── schema_extractor.py    # Schema extractor
 │       └── executor.py            # SQL execution
 ├── chroma_db/                 # Vector database storage
 ├── docker-compose.yml         # PostgreSQL service
