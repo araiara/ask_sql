@@ -4,21 +4,29 @@ from app.rag.executor import execute_sql
 
 
 def run_rag_pipeline() -> None:
-    question: str = input("Enter your question: ")
-    docs: str = retrieve_schema_docs(question)
+    while True:
+        question: str = input("Enter your question: ")
+        docs: str = retrieve_schema_docs(question)
 
-    sql_query: str = generate_sql(question, docs)
-    print("\n✅ Generated SQL Query:\n")
-    print(sql_query)
+        sql_query: str = generate_sql(question, docs)
+        print("\nGenerated SQL Query:\n")
+        print(sql_query)
 
-    user_confirmation = input("\nDo you want to execute this SQL query? (y/n): ")
-    if user_confirmation.lower() == "y":
-        result = execute_sql(sql_query)
-        print("\n✅ SQL Execution Result:\n")
-        print(result)
-    else:
-        print("SQL execution aborted by the user.")
-        return
+        user_confirmation = input("\nDo you want to execute this SQL query? (y/n): ")
+        if user_confirmation.lower() == "y":
+            try:
+                result = execute_sql(sql_query)
+                print("\nSQL Execution Result:\n")
+                print(result)
+            except Exception as e:
+                print(f"\nSQL query execution failed: {str(e)}")
+        else:
+            print("SQL execution aborted by the user.")
+
+        continue_prompt = input("\nDo you want to ask another question? (y/n): ")
+        if continue_prompt.lower() != "y":
+            print("Thank you for using the SQL Assistant. Goodbye!")
+            break
 
 
 if __name__ == "__main__":
