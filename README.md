@@ -85,6 +85,50 @@ This process:
 3. Generates semantic documentation
 4. Embeds documents into ChromaDB using AWS Bedrock Titan embeddings
 
+Sample
+```
+{
+    "categories": {
+        "columns": ["category_id", "category_name"],
+        "primary_keys": ["category_id"],
+        "foreign_keys": [],
+    },
+    "products": {
+        "columns": ["product_id", "product_name", "category_id", "price"],
+        "primary_keys": ["product_id"],
+        "foreign_keys": [
+            {"column": "category_id", "references": "categories.category_id"}
+        ],
+    },
+    "customers": {
+        "columns": ["customer_id", "first_name", "last_name", "email", "created_at"],
+        "primary_keys": ["customer_id"],
+        "foreign_keys": [],
+    },
+    "orders": {
+        "columns": ["order_id", "customer_id", "order_date", "status"],
+        "primary_keys": ["order_id"],
+        "foreign_keys": [
+            {"column": "customer_id", "references": "customers.customer_id"}
+        ],
+    },
+    "order_items": {
+        "columns": [
+            "order_item_id",
+            "order_id",
+            "product_id",
+            "quantity",
+            "unit_price",
+        ],
+        "primary_keys": ["order_item_id"],
+        "foreign_keys": [
+            {"column": "order_id", "references": "orders.order_id"},
+            {"column": "product_id", "references": "products.product_id"},
+        ],
+    },
+}
+```
+
 ### Run RAG Query System
 
 Ask natural language questions about your database:
@@ -183,3 +227,7 @@ sql-genai/
 - **PostgreSQL**: Source database
 - **psycopg2**: PostgreSQL adapter
 - **Docker**: Containerization
+
+## Sample questions.
+- What is the average order value per customer?
+- How many orders were placed last month?

@@ -1,39 +1,49 @@
 from langchain_aws import ChatBedrock
 from langchain_core.prompts import PromptTemplate
+
 from app.config import get_bedrock_client
 
 
-def generate_sql(question: str, retrieved_docs: str) -> str:
+PROMPT_TEMPLATE = """
+You are an expert SQL engineer.
+
+RULES (MANDATORY):
+- Use ONLY tables and columns listed in the schema.
+- Do NOT invent columns or tables.
+- Use explicit JOINs via foreign keys.
+- Revenue = SUM(order_items.quantity * order_items.unit_price)
+- If information is missing, say “schema does not support this query”
+- Validate join paths using foreign keys
+
+AUTHORITATIVE SCHEMA:
+{schema}
+
+SEMANTIC CONTEXT (for reasoning only):
+{context}
+
+USER QUESTION:
+{question}
+
+Return ONLY valid PostgreSQL SQL, no explanations.
+"""
+
+
+def generate_sql(question: str, retrieved_docs: str, authoritative_schema: str) -> str:
     llm = ChatBedrock(
         client=get_bedrock_client(), model_id="amazon.nova-pro-v1:0", temperature=0
     )
 
-    prompt_template: str = """
-You are an expert SQL engineer.
-
-Rules:
-1. Always use explicit JOINs
-2. Use foreign key relationships provided
-3. Revenue = SUM(order_items.quantity * order_items.unit_price)
-4. Only include completed orders
-5. If information is missing, ask for clarification
-
-Database schema:
-{schema_docs}
-
-User question:
-{question}
-
-Write a correct Postgres SQL query. Only return SQL, no explanations.
-Make sure the generated query is syntactically correct.
-
-SQL Query:
-"""
     prompt = PromptTemplate(
-        input_variables=["schema_docs", "question"], template=prompt_template
+        input_variables=["schema", "context", "question"], template=PROMPT_TEMPLATE
     )
     chain = prompt | llm
-    response = chain.invoke({"schema_docs": retrieved_docs, "question": question})
+    response = chain.invoke(
+        {
+            "schema": authoritative_schema,
+            "context": retrieved_docs,
+            "question": question,
+        }
+    )
     sql_query: str = response.content.strip()
 
     # Remove markdown code fences if present
