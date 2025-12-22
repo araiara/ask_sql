@@ -4,25 +4,21 @@ Purpose: Stores customer purchase events.
 Grain: One row per order.
 Joins:
 - orders.customer_id → customers.customer_id
-- orders.order_id → order_items.order_id
 Filters:
 - status = 'completed' for revenue queries
 Common analytics:
 - Orders per customer
-- Monthly revenue
 """
 
 ORDER_ITEMS = """
-Table: orders
+Table: order_items
 Purpose: Stores customer purchase events.
 Grain: One row per order.
 Joins:
-- orders.customer_id → customers.customer_id
+- products.product_id → order_items.product_id
 - orders.order_id → order_items.order_id
-Filters:
-- status = 'completed' for revenue queries
 Common analytics:
-- Orders per customer
+- Orders per product
 - Monthly revenue
 """
 
