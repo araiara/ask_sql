@@ -14,6 +14,7 @@ RULES (MANDATORY):
 - Revenue = SUM(order_items.quantity * order_items.unit_price)
 - If information is missing, say “schema does not support this query”
 - Validate join paths using foreign keys
+- For out of context queries, say “context does not support this query”
 
 AUTHORITATIVE SCHEMA:
 {schema}
