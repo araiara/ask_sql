@@ -228,5 +228,7 @@ sql-genai/
 - **Docker**: Containerization
 
 ## Sample questions.
-- What is the average order value per customer?
+- What is the total sales of all time?
 - How many orders were placed last month?
+- What are the top 5 most sold items?
+- How many customers ordered this year?

@@ -10,6 +10,8 @@ from app.rag.schema_extractor import extract_schema
 load_dotenv()
 
 CHROMA_DIR: str = os.path.join(os.path.dirname(__file__), "../chroma_db")
+EMBED_MODEL_ID: str = "amazon.titan-embed-text-v2:0"
+LLM_MODEL_ID: str = "amazon.nova-pro-v1:0"
 
 
 def get_postgres_connection() -> connection:
@@ -35,7 +37,7 @@ def get_bedrock_client() -> boto3.client:
 def get_embedding_function() -> BedrockEmbeddings:
     return BedrockEmbeddings(
         client=get_bedrock_client(),
-        model_id="amazon.titan-embed-text-v2:0",
+        model_id=EMBED_MODEL_ID,
     )
 
 

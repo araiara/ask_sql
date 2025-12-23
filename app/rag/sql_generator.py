@@ -1,7 +1,7 @@
 from langchain_aws import ChatBedrock
 from langchain_core.prompts import PromptTemplate
 
-from app.config import get_bedrock_client
+from app.config import LLM_MODEL_ID, get_bedrock_client
 
 
 PROMPT_TEMPLATE = """
@@ -12,9 +12,9 @@ RULES (MANDATORY):
 - Do NOT invent columns or tables.
 - Use explicit JOINs via foreign keys.
 - Revenue = SUM(order_items.quantity * order_items.unit_price)
-- If information is missing, say “schema does not support this query”
-- Validate join paths using foreign keys
-- For out of context queries, say “context does not support this query”
+- If information is missing, say “schema does not support this query.”
+- Validate join paths using foreign keys.
+- For queries unrelated to ecommerce sql generator, give a generic answer without taking any provided schema context.
 
 AUTHORITATIVE SCHEMA:
 {schema}
@@ -30,9 +30,7 @@ Return ONLY valid PostgreSQL SQL, no explanations.
 
 
 def generate_sql(question: str, retrieved_docs: str, authoritative_schema: str) -> str:
-    llm = ChatBedrock(
-        client=get_bedrock_client(), model_id="amazon.nova-pro-v1:0", temperature=0
-    )
+    llm = ChatBedrock(client=get_bedrock_client(), model_id=LLM_MODEL_ID, temperature=0)
 
     prompt = PromptTemplate(
         input_variables=["schema", "context", "question"], template=PROMPT_TEMPLATE
